@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog Posts</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+
+<body>
+  <header>
+    <h1>Blog Posts</h1>
+  </header>
+
+  <main class="container">
+    <div class="action-bar">
+      <a href="/add" class="btn">Add New</a>
+    </div>
+
+    <div id="posts-list">
+      <!-- Posts will be loaded here -->
+    </div>
+  </main>
+
+
+
+  <script>
+    // Function to fetch and display posts
+    async function loadPosts() {
+      try {
+        const response = await fetch('/api/posts');
+        const posts = await response.json();
+
+        const postsContainer = document.getElementById('posts-list');
+        postsContainer.innerHTML = posts.map(post => `
+                    <article class="post-card">
+                        <h2>${post.title}</h2>
+                        <p>${post.content}</p>
+                        <p class="post-status">Published: ${post.published ? 'Yes' : 'No'}</p>
+                        <div class="post-actions">
+                            <button onclick="handleDelete('${post._id}')" class="btn btn-delete">Delete</button>
+                            <a href="/edit?id=${post._id}" class="btn">Update</a>
+                        </div>
+                    </article>
+                `).join('');
+      } catch (error) {
+        console.error('Error loading posts:', error);
+      }
+    }
+
+    // Delete post function
+    async function handleDelete(id) {
+      if (confirm('Are you sure you want to delete this post?')) {
+        try {
+          const response = await fetch(`/api/posts/${id}`, {
+            method: 'DELETE'
+          });
+          if (response.ok) {
+            loadPosts(); // Reload posts after deletion
+          } else {
+            throw new Error('Failed to delete post');
+          }
+        } catch (error) {
+          console.error('Error deleting post:', error);
+          alert('Failed to delete post');
+        }
+      }
+    }
+
+    // Load posts when page loads
+    document.addEventListener('DOMContentLoaded', loadPosts);
+  </script>
+</body>
+
+</html>  
+
+
+
+
+
+
+
